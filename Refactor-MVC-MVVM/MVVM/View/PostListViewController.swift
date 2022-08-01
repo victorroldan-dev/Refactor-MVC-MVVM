@@ -11,7 +11,7 @@ import Combine
 class PostListViewController: UIViewController{
     @IBOutlet weak var tableView: UITableView!
 
-    var viewModel = PostViewModel()
+    private var viewModel = PostViewModel()
     private var anyCancellable = Set<AnyCancellable>()
     
     lazy var loading : UIActivityIndicatorView = {
@@ -24,7 +24,7 @@ class PostListViewController: UIViewController{
     override func viewDidLoad() {
         super.viewDidLoad()
         configTableView()
-        susbcriptions()
+        subscriptions()
         Task{
             await self.viewModel.getPosts()
         }
@@ -36,11 +36,11 @@ class PostListViewController: UIViewController{
         tableView.dataSource = self
     }
     
-    private func susbcriptions(){
+    private func subscriptions(){
         viewModel.postObservable.sink { error in
             print("erro: ", error)
-        } receiveValue: {
-            self.tableView.reloadData()
+        } receiveValue: {[weak self] in
+            self?.tableView.reloadData()
         }.store(in: &anyCancellable)
         
         viewModel.wasRemovedObservable.sink {[weak self] (wasRemoved, indexPath) in
